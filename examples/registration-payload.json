@@ -1,0 +1,28 @@
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "streetAddress": "123 Main St",
+  "streetAddressLine2": "Apt 4B",
+  "city": "New York",
+  "stateProvince": "NY",
+  "postalCode": "10001",
+  "phoneNumber": "(555) 123-4567",
+  "email": "john.doe@example.com",
+  "hearAboutUs": "Social Media",
+  "otherSource": "",
+  "feedback": "Great service!",
+  "suggestions": "More online options would be nice",
+  "willingToRecommend": "Yes",
+  "references": [
+    {
+      "fullName": "Jane Smith",
+      "address": "456 Park Ave, New York, NY 10002",
+      "contactNumber": "(555) 987-6543"
+    },
+    {
+      "fullName": "Bob Wilson",
+      "address": "789 Broadway, New York, NY 10003",
+      "contactNumber": "(555) 456-7890"
+    }
+  ]
+}
