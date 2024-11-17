@@ -52,7 +52,7 @@ export async function createReferences(registrationId: number, references: Regis
     for (let i = 0; i < references.length; i++) {
       const ref = references[i];
       await sql`
-        INSERT INTO references (
+        INSERT INTO registration_references (
           registration_id,
           full_name,
           address,
@@ -86,7 +86,7 @@ export async function getAllRegistrations() {
                'referenceOrder', ref.reference_order
              )) as references
       FROM registrations r
-      LEFT JOIN references ref ON r.id = ref.registration_id
+      LEFT JOIN registration_references ref ON r.id = ref.registration_id
       GROUP BY r.id
       ORDER BY r.created_at DESC
     `;

@@ -27,9 +27,9 @@ export async function ensureTablesExist() {
           );
         END IF;
 
-        -- Create references table if it doesn't exist
-        IF NOT EXISTS (SELECT FROM pg_tables WHERE tablename = 'references') THEN
-          CREATE TABLE references (
+        -- Create registration_references table if it doesn't exist
+        IF NOT EXISTS (SELECT FROM pg_tables WHERE tablename = 'registration_references') THEN
+          CREATE TABLE registration_references (
             id SERIAL PRIMARY KEY,
             registration_id INTEGER,
             full_name VARCHAR(200) NOT NULL,
@@ -40,10 +40,10 @@ export async function ensureTablesExist() {
 
           -- Add foreign key constraint if it doesn't exist
           IF NOT EXISTS (
-            SELECT 1 FROM pg_constraint WHERE conname = 'references_registration_id_fkey'
+            SELECT 1 FROM pg_constraint WHERE conname = 'registration_references_registration_id_fkey'
           ) THEN
-            ALTER TABLE references
-            ADD CONSTRAINT references_registration_id_fkey
+            ALTER TABLE registration_references
+            ADD CONSTRAINT registration_references_registration_id_fkey
             FOREIGN KEY (registration_id) REFERENCES registrations(id)
             ON DELETE CASCADE;
           END IF;
