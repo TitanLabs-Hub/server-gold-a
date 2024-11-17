@@ -19,7 +19,6 @@ export default function Home() {
               <ul className="ml-4 mt-2 space-y-2">
                 <li><a href="#submit-registration" className="text-gray-400 hover:text-blue-400 text-sm">Submit Form</a></li>
                 <li><a href="#get-registrations" className="text-gray-400 hover:text-blue-400 text-sm">Get Registrations</a></li>
-                <li><a href="#init-db" className="text-gray-400 hover:text-blue-400 text-sm">Initialize DB</a></li>
               </ul>
             </li>
             <li>
@@ -173,24 +172,6 @@ export default function Home() {
       ]
     }
   ]
-}`}
-                </pre>
-              </div>
-            </section>
-
-            {/* Initialize DB */}
-            <section id="init-db" className="bg-gray-800 rounded-xl p-6 shadow-xl border border-gray-700">
-              <div className="flex items-center gap-3 mb-4">
-                <span className="px-3 py-1 bg-green-500 text-white rounded-md text-sm font-medium">POST</span>
-                <h3 className="text-xl font-bold text-blue-400">/api/registration/init</h3>
-              </div>
-              <p className="text-gray-400 mb-4">Initialize the registration database schema</p>
-              <div className="bg-gray-900 rounded-lg p-4">
-                <h4 className="text-sm font-semibold text-gray-400 mb-2">Response</h4>
-                <pre className="text-sm text-gray-300 overflow-x-auto">
-{`{
-  "success": true,
-  "message": "Registration tables initialized successfully"
 }`}
                 </pre>
               </div>

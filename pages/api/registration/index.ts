@@ -2,6 +2,54 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { sql } from '@vercel/postgres';
 import { RegistrationData } from '../../../types/registration';
 
+async function ensureTablesExist() {
+  try {
+    // Check if tables exist
+    const tableCheck = await sql`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'registrations'
+      );
+    `;
+
+    if (!tableCheck.rows[0].exists) {
+      // Create tables if they don't exist
+      await sql`
+        CREATE TABLE registrations (
+          id SERIAL PRIMARY KEY,
+          first_name VARCHAR(100) NOT NULL,
+          last_name VARCHAR(100) NOT NULL,
+          street_address VARCHAR(255) NOT NULL,
+          street_address_line2 VARCHAR(255),
+          city VARCHAR(100) NOT NULL,
+          state_province VARCHAR(100) NOT NULL,
+          postal_code VARCHAR(20) NOT NULL,
+          phone_number VARCHAR(20) NOT NULL,
+          email VARCHAR(255) NOT NULL,
+          hear_about_us VARCHAR(100) NOT NULL,
+          other_source TEXT,
+          feedback TEXT,
+          suggestions TEXT,
+          willing_to_recommend VARCHAR(10),
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE references (
+          id SERIAL PRIMARY KEY,
+          registration_id INTEGER REFERENCES registrations(id),
+          full_name VARCHAR(200) NOT NULL,
+          address TEXT NOT NULL,
+          contact_number VARCHAR(20) NOT NULL,
+          reference_order INTEGER NOT NULL
+        );
+      `;
+    }
+  } catch (error) {
+    console.error('Error checking/creating tables:', error);
+    throw new Error('Failed to initialize database tables');
+  }
+}
+
 async function createRegistration(data: RegistrationData) {
   const registration = await sql`
     INSERT INTO registrations (
@@ -63,9 +111,21 @@ async function createReferences(registrationId: number, references: Registration
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   if (req.method === 'POST') {
     try {
       const data: RegistrationData = req.body;
+
+      // Ensure tables exist before proceeding
+      await ensureTablesExist();
 
       await sql`BEGIN`;
       try {
@@ -91,6 +151,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   } else if (req.method === 'GET') {
     try {
+      // Ensure tables exist before querying
+      await ensureTablesExist();
+
       const registrations = await sql`
         SELECT r.*, 
                array_agg(json_build_object(

@@ -6,6 +6,33 @@ interface DataRecord {
   numbers: string;
 }
 
+async function ensureDataTableExists() {
+  try {
+    const tableCheck = await sql`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'data_records'
+      );
+    `;
+
+    if (!tableCheck.rows[0].exists) {
+      await sql`
+        CREATE TABLE data_records (
+          id SERIAL PRIMARY KEY,
+          timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
+          numbers TEXT NOT NULL,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE INDEX idx_timestamp ON data_records(timestamp);
+      `;
+    }
+  } catch (error) {
+    console.error('Error checking/creating data_records table:', error);
+    throw new Error('Failed to initialize data_records table');
+  }
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -18,6 +45,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === 'GET') {
     try {
+      await ensureDataTableExists();
+
       const page = parseInt(req.query.page as string || '1');
       const pageSize = parseInt(req.query.pageSize as string || '10');
       const offset = (page - 1) * pageSize;
@@ -47,6 +76,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   } else if (req.method === 'POST') {
     try {
+      await ensureDataTableExists();
+
       const { data } = req.body as { data: DataRecord[] };
       
       // Process data in batches of 100
