@@ -47,6 +47,16 @@ export default function Home() {
                 <h3 className="text-xl font-bold text-blue-400">/api/health</h3>
               </div>
               <p className="text-gray-400 mb-4">Check the health status of the API and its dependencies</p>
+              
+              <div className="bg-gray-900 rounded-lg p-4 mb-4">
+                <h4 className="text-sm font-semibold text-gray-400 mb-2">Headers Required</h4>
+                <pre className="text-sm text-gray-300 overflow-x-auto">
+{`{
+  "x-api-key": "your-api-key-here"
+}`}
+                </pre>
+              </div>
+
               <div className="bg-gray-900 rounded-lg p-4">
                 <h4 className="text-sm font-semibold text-gray-400 mb-2">Response (Healthy)</h4>
                 <pre className="text-sm text-gray-300 overflow-x-auto">
