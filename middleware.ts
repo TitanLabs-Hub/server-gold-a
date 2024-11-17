@@ -15,6 +15,13 @@ export function middleware(request: NextRequest) {
     });
   }
 
+  // Check for API key
+  const apiKey = request.headers.get('x-api-key');
+  if (!apiKey || apiKey !== process.env.API_KEY) {
+    // Redirect to unauthorized endpoint instead of returning response body
+    return NextResponse.rewrite(new URL('/api/unauthorized', request.url));
+  }
+
   const response = NextResponse.next();
   
   // Add CORS headers to all responses
