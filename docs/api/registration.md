@@ -2,21 +2,6 @@
 
 ## Endpoints
 
-### Initialize Database
-Creates the necessary database tables for registrations and references.
-
-```http
-POST /api/registration/init
-```
-
-#### Response
-```json
-{
-  "success": true,
-  "message": "Registration tables initialized successfully"
-}
-```
-
 ### Submit Registration
 Submits a new registration form with references.
 
