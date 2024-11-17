@@ -1,5 +1,5 @@
 import { sql } from '@vercel/postgres';
-import { RegistrationData } from './types';
+import { RegistrationData } from '../types/registration';
 
 export async function createRegistration(data: RegistrationData) {
   const registration = await sql`

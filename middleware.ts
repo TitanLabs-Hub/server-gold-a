@@ -4,15 +4,21 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   // Handle preflight requests
   if (request.method === 'OPTIONS') {
-    return new NextResponse(null, {
-      status: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Max-Age': '86400',
-      },
-    });
+    const response = new NextResponse(null, { status: 204 });
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-API-Key');
+    response.headers.set('Access-Control-Max-Age', '86400');
+    return response;
+  }
+
+  // Check for API key in headers
+  const apiKey = request.headers.get('x-api-key');
+  const requiredApiKey = process.env.API_KEY;
+
+  if (!apiKey || !requiredApiKey || apiKey !== requiredApiKey) {
+    // Instead of returning a response body, we'll redirect to a 401 error page
+    return NextResponse.redirect(new URL('/api/unauthorized', request.url));
   }
 
   const response = NextResponse.next();
@@ -20,7 +26,7 @@ export function middleware(request: NextRequest) {
   // Add CORS headers to all responses
   response.headers.set('Access-Control-Allow-Origin', '*');
   response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-API-Key');
 
   return response;
 }
