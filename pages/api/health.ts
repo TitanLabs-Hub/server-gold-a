@@ -18,15 +18,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 
-  // Check for API key
-  const apiKey = req.headers['x-api-key'] as string;
-  if (!apiKey || apiKey !== process.env.API_KEY) {
-    return res.status(401).json({
-      status: 'error',
-      message: 'Unauthorized - Invalid API Key'
-    });
-  }
-
   try {
     // Test database connection
     await sql`SELECT 1`;

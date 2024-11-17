@@ -15,10 +15,13 @@ export function middleware(request: NextRequest) {
     });
   }
 
-  // Check for API key
-  const apiKey = request.headers.get('x-api-key');
-  if (!apiKey || apiKey !== process.env.API_KEY) {
-    // Redirect to unauthorized endpoint instead of returning response body
+  // Get API key from either header format
+  const apiKey = request.headers.get('x-api-key') || 
+                request.headers.get('authorization')?.replace('Bearer ', '');
+                
+  const expectedApiKey = 'XfwtZdtgUsPHenrYDdS0rK7Xwk77Oel6LhTtSITSSiSnPvmMfMMSeNrBiZORrmiancGuAO8UWfCqXFhufCa4ZU4oGVgKk6aO4KqeWYjQVMVkeovm1TT2yVIAOz0RWVyQ';
+
+  if (!apiKey || apiKey !== expectedApiKey) {
     return NextResponse.rewrite(new URL('/api/unauthorized', request.url));
   }
 
