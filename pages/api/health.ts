@@ -2,6 +2,15 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { sql } from '@vercel/postgres';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   if (req.method !== 'GET') {
     return res.status(405).json({ 
       status: 'error',
@@ -21,8 +30,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         status: 'connected',
         type: 'PostgreSQL'
       },
-      version: process.env.npm_package_version || '1.0.0',
-      environment: process.env.NODE_ENV
+      version: '1.0.0',
+      environment: process.env.NODE_ENV || 'production'
     });
   } catch (error) {
     // If database check fails, return error response
