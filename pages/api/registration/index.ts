@@ -4,6 +4,43 @@ import { RegistrationData } from '../../../types/registration';
 import { ensureTablesExist } from '../../../lib/db/init';
 import { createRegistration, createReferences, getAllRegistrations } from '../../../lib/db/registration';
 
+function validateRegistrationData(data: any): data is RegistrationData {
+  if (!data || typeof data !== 'object') return false;
+
+  const requiredFields = [
+    'firstName',
+    'lastName',
+    'streetAddress',
+    'city',
+    'stateProvince',
+    'postalCode',
+    'phoneNumber',
+    'email',
+    'hearAboutUs',
+    'willingToRecommend'
+  ];
+
+  for (const field of requiredFields) {
+    if (!data[field] || typeof data[field] !== 'string') {
+      throw new Error(`Missing or invalid required field: ${field}`);
+    }
+  }
+
+  if (data.references !== undefined && !Array.isArray(data.references)) {
+    throw new Error('References must be an array');
+  }
+
+  if (Array.isArray(data.references)) {
+    for (const ref of data.references) {
+      if (!ref.fullName || !ref.address || !ref.contactNumber) {
+        throw new Error('Invalid reference data: missing required fields');
+      }
+    }
+  }
+
+  return true;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -19,12 +56,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await ensureTablesExist();
 
     if (req.method === 'POST') {
+      // Validate input data
+      if (!validateRegistrationData(req.body)) {
+        return res.status(400).json({
+          error: 'Invalid registration data',
+          details: 'Missing or invalid required fields'
+        });
+      }
+
       const data: RegistrationData = req.body;
 
       await sql`BEGIN`;
       try {
         const registrationId = await createRegistration(data);
-        await createReferences(registrationId, data.references);
+        if (data.references && data.references.length > 0) {
+          await createReferences(registrationId, data.references);
+        }
         await sql`COMMIT`;
 
         res.json({

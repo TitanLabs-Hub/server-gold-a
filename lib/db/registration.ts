@@ -49,8 +49,17 @@ export async function createRegistration(data: RegistrationData) {
 
 export async function createReferences(registrationId: number, references: RegistrationData['references']) {
   try {
+    // Ensure references is an array and has items
+    if (!Array.isArray(references) || references.length === 0) {
+      return; // Skip if no references
+    }
+
     for (let i = 0; i < references.length; i++) {
       const ref = references[i];
+      if (!ref.fullName || !ref.address || !ref.contactNumber) {
+        throw new Error('Invalid reference data: missing required fields');
+      }
+
       await sql`
         INSERT INTO registration_references (
           registration_id,
@@ -79,12 +88,20 @@ export async function getAllRegistrations() {
   try {
     const registrations = await sql`
       SELECT r.*, 
-             array_agg(json_build_object(
-               'fullName', ref.full_name,
-               'address', ref.address,
-               'contactNumber', ref.contact_number,
-               'referenceOrder', ref.reference_order
-             )) as references
+             COALESCE(
+               array_agg(
+                 CASE WHEN ref.id IS NOT NULL 
+                   THEN json_build_object(
+                     'fullName', ref.full_name,
+                     'address', ref.address,
+                     'contactNumber', ref.contact_number,
+                     'referenceOrder', ref.reference_order
+                   )
+                   ELSE NULL
+                 END
+               ) FILTER (WHERE ref.id IS NOT NULL),
+               ARRAY[]::json[]
+             ) as references
       FROM registrations r
       LEFT JOIN registration_references ref ON r.id = ref.registration_id
       GROUP BY r.id
